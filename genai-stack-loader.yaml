@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genai-stack-loader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: genai-stack-loader
+  template:
+    metadata:
+      labels:
+        app: genai-stack-loader
+    spec:
+      containers:
+        - name: genai-stack-loader
+          image: chunyeow/genai-stack-loader:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8502
+          env:
+            - name: LLM
+              value: "llama2"
+            - name: NEO4J_URI
+              value: "neo4j://neo4j-release:7687"
+            - name: NEO4J_PASSWORD
+              value: "password"
+            - name: NEO4J_USERNAME
+              value: "neo4j"
+            - name: OPENAI_API_KEY
+              value: ""
+            - name: OLLAMA_BASE_URL
+              value: "http://ollama-linux:11434"
+            - name: EMBEDDING_MODEL
+              value: "sentence_transformer"
+            - name: LANGCHAIN_ENDPOINT
+              value: ""
+            - name: LANGCHAIN_TRACING_V2
+              value: ""
+            - name: LANGCHAIN_PROJECT
+              value: "k8s-langchain"
+            - name: LANGCHAIN_API_KEY
+              value: ""
+            - name: AWS_ACCESS_KEY_ID
+              value: ""
+            - name: AWS_SECRET_ACCESS_KEY
+              value: ""
+            - name: AWS_DEFAULT_REGION
+              value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genai-loader-service
+spec:
+  ports:
+  - name: http-passthrough
+    port: 8502
+    protocol: TCP
+    targetPort: 8502
+  selector:
+    app: genai-stack-loader
+  type: ClusterIP
