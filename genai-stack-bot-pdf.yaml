@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genai-stack-bot-pdf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: genai-stack-bot-pdf
+  template:
+    metadata:
+      labels:
+        app: genai-stack-bot-pdf
+    spec:
+      containers:
+        - name: genai-stack-bot-pdf
+          image: chunyeow/genai-stack_pdf_bot:latest
+          ports:
+            - containerPort: 8503
+          env:
+            - name: LLM
+              value: "llama2"
+            - name: NEO4J_URI
+              value: "neo4j://neo4j-release.default.svc.cluster.local:7687"
+            - name: NEO4J_PASSWORD
+              value: "password"
+            - name: NEO4J_USERNAME
+              value: "neo4j"
+            - name: OPENAI_API_KEY
+              value: ""
+            - name: OLLAMA_BASE_URL
+              value: "http://ollama-linux-gpu:11434"
+            - name: EMBEDDING_MODEL
+              value: "sentence_transformer"
+            - name: LANGCHAIN_ENDPOINT
+              value: ""
+            - name: LANGCHAIN_TRACING_V2
+              value: ""
+            - name: LANGCHAIN_PROJECT
+              value: "k8s-langchain"
+            - name: LANGCHAIN_API_KEY
+              value: ""
+            - name: AWS_ACCESS_KEY_ID
+              value: ""
+            - name: AWS_SECRET_ACCESS_KEY
+              value: ""
+            - name: AWS_DEFAULT_REGION
+              value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genai-bot-pdf-service
+spec:
+  ports:
+  - name: http-passthrough
+    port: 8503
+    protocol: TCP
+    targetPort: 8503
+  selector:
+    app: genai-stack-bot-pdf
+  type: ClusterIP
